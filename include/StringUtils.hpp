@@ -28,10 +28,14 @@ std::vector<std::string> split(const std::string& s, const std::string& d) {
   return ret;
 }
 
-std::string extensionOf(const std::string& path) {
-  auto v = split(path, ".");
-  if (v.empty()) return "";
-  return v.back();
+bool beginsWith(const std::string& str, const std::string& test) {
+  size_t pos = str.find_first_of(test);
+  return pos == 0;
+}
+
+bool endsWith(const std::string& str, const std::string& test) {
+  size_t pos = str.find_last_of(test);
+  return pos == str.size() - 1;
 }
 
 std::string toLower(const std::string& s) {
