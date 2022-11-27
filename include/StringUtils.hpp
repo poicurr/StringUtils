@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 inline char toLower(char c) { return 'A' <= c && c <= 'Z' ? c + 'a' - 'A' : c; }
@@ -71,7 +70,7 @@ std::string trim(const std::string& s) { return trimLeft(trimRight(s)); }
 
 std::string repeat(char c, size_t n) { return std::string(n, c); }
 
-std::string encodeURL(char c) {
+std::string encode(char c) {
   static const char a[] = "0123456789ABCDEF";
   auto ret = std::string{};
   ret += a[(0xf0 & c) >> 4];
@@ -82,20 +81,15 @@ std::string encodeURL(char c) {
 std::string encodeURL(const std::string& s) {
   auto ret = std::string{};
   for (char c : s) {
-    ret += "%" + encodeURL(c);
+    ret += "%" + encode(c);
   }
   return ret;
 }
 
 char decode(const std::string& s) {
-  static const std::unordered_map<char, unsigned> m = {
-      {'0', 0},  {'1', 1},  {'2', 2},  {'3', 3},  {'4', 4},  {'5', 5},
-      {'6', 6},  {'7', 7},  {'8', 8},  {'9', 9},  {'A', 10}, {'B', 11},
-      {'C', 12}, {'D', 13}, {'E', 14}, {'F', 15},
-  };
-  uint8_t c1 = (m.at(s[0]) << 4);
-  uint8_t c2 = m.at(s[1]);
-  return static_cast<char>(c1 | c2);
+  uint8_t c1 = isDigit(s[0]) ? s[0] - '0' : s[0] - 'A' + 10;
+  uint8_t c2 = isDigit(s[1]) ? s[1] - '0' : s[1] - 'A' + 10;
+  return static_cast<char>((c1 << 4) | c2);
 }
 
 std::string decodeURL(const std::string& s) {
