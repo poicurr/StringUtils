@@ -81,6 +81,10 @@ std::string encode(char c) {
 std::string encodeURL(const std::string& s) {
   auto ret = std::string{};
   for (char c : s) {
+    if (isLetter(c)) {
+      ret += c;
+      continue;
+    }
     ret += "%" + encode(c);
   }
   return ret;
@@ -93,11 +97,20 @@ char decode(const std::string& s) {
 }
 
 std::string decodeURL(const std::string& s) {
-  auto v = split(s, "%");
   auto ret = std::string{};
-  for (auto s : v) {
-    if (s.empty()) continue;
-    ret += decode(s);
+  auto p = s.begin(), eol = s.end();
+  while (p != eol) {
+    if (*p == '%') {
+      ++p;
+      auto s2 = std::string{p, p + 2};
+      ret += decode(s2);
+      p += 2;
+      continue;
+    }
+    while (*p != '%' && p != eol) {
+      ret += *p;
+      ++p;
+    }
   }
   return ret;
 }
