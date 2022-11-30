@@ -141,3 +141,7 @@ std::string join(const std::vector<std::string> v, const std::string& d) {
   }
   return ret;
 }
+
+bool contains(const std::string& str, const std::string& pattern) {
+  return str.find(pattern) != std::string::npos;
+}
