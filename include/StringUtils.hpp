@@ -145,3 +145,7 @@ std::string join(const std::vector<std::string> v, const std::string& d) {
 bool contains(const std::string& str, const std::string& pattern) {
   return str.find(pattern) != std::string::npos;
 }
+
+std::string fixpath(const std::string& path) {
+  return replace(replace(path, "\\", "/"), "//", "/");
+}
