@@ -15,6 +15,7 @@ inline bool isLF(char c) { return c == '\n'; }
 inline bool isCrlf(char c) { return isCR(c) || isLF(c); }
 inline bool isSpace(char c) { return c == ' ' || c == '\t'; }
 inline bool isLetter(char c) { return isAlpha(c) || isDigit(c) || c == '_'; }
+inline bool isCtl(int c) { return (c >= 0 && c <= 31) || (c == 127); }
 
 std::vector<std::string> split(const std::string& s, const std::string& d) {
   if (s.empty()) return {};
