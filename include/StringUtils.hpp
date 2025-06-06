@@ -38,12 +38,12 @@ inline std::vector<std::string> split(std::string_view s, std::string_view d) {
   return ret;
 }
 
-inline bool beginsWith(std::string_view str, const std::string& test) {
+inline bool beginsWith(std::string_view str, std::string_view test) {
   if (str.size() < test.size()) return false;
   return str.compare(0, test.size(), test) == 0;
 }
 
-inline bool endsWith(std::string_view str, const std::string& test) {
+inline bool endsWith(std::string_view str, std::string_view test) {
   if (str.size() < test.size()) return false;
   return str.compare(str.size() - test.size(), test.size(), test) == 0;
 }
@@ -69,6 +69,7 @@ inline std::string trimLeft(const std::string& s) {
 }
 
 inline std::string trimRight(const std::string& s) {
+  if (s.empty()) return {};
   auto first = s.begin(), last = s.end() - 1;
   while (first <= last && isSpace(*last)) --last;
   return {first, last + 1};
@@ -76,7 +77,9 @@ inline std::string trimRight(const std::string& s) {
 
 inline std::string trim(const std::string& s) { return trimLeft(trimRight(s)); }
 
-inline std::string repeat(char c, size_t n) { return std::string(n, c); }
+inline std::string repeat(char c, size_t n) noexcept {
+  return std::string(n, c);
+}
 
 inline std::string encode(char c) noexcept {
   static const char a[] = "0123456789ABCDEF";
@@ -96,9 +99,13 @@ inline std::string encodeURL(const std::string& s) {
 }
 
 inline char decode(const std::string& s) noexcept {
-  uint8_t c1 = isDigit(s[0]) ? s[0] - '0' : s[0] - 'A' + 10;
-  uint8_t c2 = isDigit(s[1]) ? s[1] - '0' : s[1] - 'A' + 10;
-  return static_cast<char>((c1 << 4) | c2);
+  auto toHexValue = [](char c) -> uint8_t {
+    if ('0' <= c && c <= '9') return c - '0';       // '0' ~ '9' ->  0 ~  9
+    if ('a' <= c && c <= 'z') return c - 'a' + 10;  // 'a' ~ 'f' -> 10 ~ 15
+    if ('A' <= c && c <= 'Z') return c - 'A' + 10;  // 'A' ~ 'F' -> 10 ~ 15
+    return 0;
+  };
+  return static_cast<char>((toHexValue(s[0]) << 4) | toHexValue(s[1]));
 }
 
 inline std::string decodeURL(const std::string& s) {
@@ -116,12 +123,15 @@ inline std::string decodeURL(const std::string& s) {
 
 inline std::string replace(std::string_view s, std::string_view pattern,
                            std::string_view replacement) {
+  if (s.empty()) return {};
+  if (pattern.empty()) return {s.begin(), s.end()};
+
   std::string ret;
   size_t p1 = 0, p2;
   while (true) {
     p2 = s.find(pattern, p1);
     if (p2 == std::string_view::npos) {
-      ret += s.substr(p2);
+      ret += s.substr(p1);
       break;
     }
     ret += s.substr(p1, p2 - p1);
@@ -139,7 +149,7 @@ inline std::string join(const std::vector<std::string>& v,
   return ret;
 }
 
-inline bool contains(const std::string& str, const std::string& pattern) {
+inline bool contains(std::string_view str, std::string_view pattern) noexcept {
   return str.find(pattern) != std::string::npos;
 }
 

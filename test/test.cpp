@@ -111,3 +111,28 @@ TEST_CASE("encodeURL/decodeURL with Japanese UTF-8", "[url][utf8]") {
   const std::string decoded = strutil::decodeURL(encoded);
   REQUIRE(decoded == original);
 }
+
+TEST_CASE("replace works", "[replace]") {
+  SECTION("Normal Case") {
+    REQUIRE(strutil::replace("abcdefghi", "abc", "ABC") == "ABCdefghi");
+    REQUIRE(strutil::replace("abcdefghi", "def", "DEF") == "abcDEFghi");
+    REQUIRE(strutil::replace("abcdefghi", "ghi", "GHI") == "abcdefGHI");
+  }
+  SECTION("Nominal Case") {
+    REQUIRE(strutil::replace("", "abc", "ABC") == "");
+    REQUIRE(strutil::replace("abcdefghi", "", "ABC") == "abcdefghi");
+    REQUIRE(strutil::replace("abcdefghi", "abc", "") == "defghi");
+  }
+}
+
+TEST_CASE("join works", "[join]") {
+  REQUIRE(strutil::join({"abc", "def", "ghi"}, ",") == "abc,def,ghi");
+  REQUIRE(strutil::join({"abc"}, ",") == "abc");
+  REQUIRE(strutil::join({}, ",") == "");
+}
+
+TEST_CASE("toUnixPath works", "[toUnixPath]") {
+  REQUIRE(strutil::toUnixPath(".\\path\\to\\file.txt") == "./path/to/file.txt");
+  REQUIRE(strutil::toUnixPath("./path/to//file.txt") == "./path/to/file.txt");
+  REQUIRE(strutil::toUnixPath(".\\\\path\\to\\file.txt") == "./path/to/file.txt");
+}
