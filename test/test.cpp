@@ -4,17 +4,17 @@
 #include <catch2/catch_test_macros.hpp>
 
 TEST_CASE("toLower works", "[toLower]") {
-  auto res = strutil::toLower("a");
-  REQUIRE(res == "a");
-  res = strutil::toLower("A");
-  REQUIRE(res == "a");
+  auto res = strutil::toLower('a');
+  REQUIRE(res == 'a');
+  res = strutil::toLower('A');
+  REQUIRE(res == 'a');
 }
 
 TEST_CASE("toUpper works", "[toUpper]") {
-  auto res = strutil::toUpper("A");
-  REQUIRE(res == "A");
-  res = strutil::toUpper("a");
-  REQUIRE(res == "A");
+    auto res = strutil::toUpper('A');
+  REQUIRE(res == 'A');
+  res = strutil::toUpper('a');
+  REQUIRE(res == 'A');
 }
 
 TEST_CASE("split works", "[split]") {

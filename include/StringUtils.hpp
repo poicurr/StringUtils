@@ -68,23 +68,24 @@ inline bool beginsWithIgnoreCase(std::string_view s, std::string_view prefix) {
 }
 
 inline bool endsWithIgnoreCase(std::string_view s, std::string_view suffix) {
-  if (s.size() < suffix.size()) return false;
-  for (size_t i = 0; i < suffix.size(); ++i)
-    if (toLower(s[i]) != toLower(suffix[i])) return false;
-  return true;
+    if (s.size() < suffix.size()) return false;
+    const size_t offset = s.size() - suffix.size();
+    for (size_t i = 0; i < suffix.size(); ++i)
+        if (toLower(s[offset + i]) != toLower(suffix[i])) return false;
+    return true;
 }
 
 inline std::string toLower(const std::string& s) {
   std::string ret;
   ret.reserve(s.size());
-  std::transform(ret.begin(), ret.end(), ret.begin(), [](char c) { return toLower(c); });
+  std::transform(s.begin(), s.end(), ret.begin(), [](char c) { return toLower(c); });
   return ret;
 }
 
 inline std::string toUpper(const std::string& s) {
   std::string ret;
   ret.reserve(s.size());
-  std::transform(ret.begin(), ret.end(), ret.begin(), [](char c) { return toUpper(c); });
+  std::transform(s.begin(), s.end(), ret.begin(), [](char c) { return toUpper(c); });
   return ret;
 }
 
