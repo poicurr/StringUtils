@@ -1,10 +1,10 @@
 #pragma once
 
-#include <cstdint>
 #include <algorithm>
+#include <cstdint>
+#include <stdexcept>
 #include <string>
 #include <string_view>
-#include <stdexcept>
 #include <vector>
 
 namespace strutil {
@@ -27,11 +27,14 @@ constexpr bool isSpace(char c) noexcept { return c == ' ' || c == '\t'; }
 constexpr bool isLetter(char c) noexcept {
   return isAlpha(c) || isDigit(c) || c == '_';
 }
-constexpr bool isCtl(int c) noexcept { return (c >= 0 && c <= 31) || (c == 127); }
+constexpr bool isCtl(int c) noexcept {
+  return (c >= 0 && c <= 31) || (c == 127);
+}
 
 inline bool isNumber(std::string_view s) {
   if (s.empty()) return false;
-  for (char c : s) if (!isDigit(c)) return false;
+  for (char c : s)
+    if (!isDigit(c)) return false;
   return true;
 }
 
@@ -68,35 +71,39 @@ inline bool beginsWithIgnoreCase(std::string_view s, std::string_view prefix) {
 }
 
 inline bool endsWithIgnoreCase(std::string_view s, std::string_view suffix) {
-    if (s.size() < suffix.size()) return false;
-    const size_t offset = s.size() - suffix.size();
-    for (size_t i = 0; i < suffix.size(); ++i)
-        if (toLower(s[offset + i]) != toLower(suffix[i])) return false;
-    return true;
+  if (s.size() < suffix.size()) return false;
+  const size_t offset = s.size() - suffix.size();
+  for (size_t i = 0; i < suffix.size(); ++i)
+    if (toLower(s[offset + i]) != toLower(suffix[i])) return false;
+  return true;
 }
 
 inline std::string toLower(const std::string& s) {
-  std::string ret;
-  ret.reserve(s.size());
-  std::transform(s.begin(), s.end(), ret.begin(), [](char c) { return toLower(c); });
+  std::string ret(s.size(), '\0');
+  std::transform(s.begin(), s.end(), ret.begin(),
+                 [](char c) { return toLower(c); });
   return ret;
 }
 
 inline std::string toUpper(const std::string& s) {
-  std::string ret;
-  ret.reserve(s.size());
-  std::transform(s.begin(), s.end(), ret.begin(), [](char c) { return toUpper(c); });
+  std::string ret(s.size(), '\0');
+  std::transform(s.begin(), s.end(), ret.begin(),
+                 [](char c) { return toUpper(c); });
   return ret;
 }
 
-inline std::string lpad(const std::string& s, size_t len, char pad = ' ') {
-  if (s.size() >= len) return s;
-  return std::string(len - s.size(), pad) + s;
+inline std::string repeat(char c, size_t n) noexcept {
+  return std::string(n, c);
 }
 
-inline std::string rpad(const std::string& s, size_t len, char pad = ' ') {
+inline std::string padLeft(const std::string& s, size_t len, char pad = ' ') {
   if (s.size() >= len) return s;
-  return s + std::string(len - s.size(), pad);
+  return repeat(pad, len - s.size()) + s;
+}
+
+inline std::string padRight(const std::string& s, size_t len, char pad = ' ') {
+  if (s.size() >= len) return s;
+  return s + repeat(pad, len - s.size());
 }
 
 inline std::string trimLeft(const std::string& s) {
@@ -108,15 +115,11 @@ inline std::string trimLeft(const std::string& s) {
 inline std::string trimRight(const std::string& s) {
   if (s.empty()) return {};
   auto first = s.begin(), last = s.end() - 1;
-  while (first <= last && isSpace(*last)) --last;
+  while (first != last && isSpace(*last)) --last;
   return {first, last + 1};
 }
 
 inline std::string trim(const std::string& s) { return trimLeft(trimRight(s)); }
-
-inline std::string repeat(char c, size_t n) noexcept {
-  return std::string(n, c);
-}
 
 inline std::string encode(char c) noexcept {
   static const char a[] = "0123456789ABCDEF";
@@ -136,7 +139,8 @@ inline std::string encodeURL(const std::string& s) {
 }
 
 inline char decode(const std::string& s) {
-  if (s.size() != 2) throw std::invalid_argument("Invalid hex string for decode: " + s);
+  if (s.size() != 2)
+    throw std::invalid_argument("Invalid hex string for decode: " + s);
   auto toHexValue = [](char c) -> uint8_t {
     if ('0' <= c && c <= '9') return c - '0';       // '0' ~ '9' ->  0 ~  9
     if ('a' <= c && c <= 'z') return c - 'a' + 10;  // 'a' ~ 'f' -> 10 ~ 15

@@ -11,7 +11,7 @@ TEST_CASE("toLower works", "[toLower]") {
 }
 
 TEST_CASE("toUpper works", "[toUpper]") {
-    auto res = strutil::toUpper('A');
+  auto res = strutil::toUpper('A');
   REQUIRE(res == 'A');
   res = strutil::toUpper('a');
   REQUIRE(res == 'A');
@@ -90,18 +90,18 @@ TEST_CASE("toUpper(std::string) works", "[toUpper]") {
   REQUIRE(strutil::toUpper("abcDEfg") == "ABCDEFG");
 }
 
-TEST_CASE("lpad works", "[lpad]") {
-  REQUIRE(strutil::lpad("abc", 5) == "  abc");
-  REQUIRE(strutil::lpad("abc", 5, '0') == "00abc");
-  REQUIRE(strutil::lpad("abc", 2) == "abc");
-  REQUIRE(strutil::lpad("", 3, '*') == "***");
+TEST_CASE("padLeft works", "[padLeft]") {
+  REQUIRE(strutil::padLeft("abc", 5) == "  abc");
+  REQUIRE(strutil::padLeft("abc", 5, '0') == "00abc");
+  REQUIRE(strutil::padLeft("abc", 2) == "abc");
+  REQUIRE(strutil::padLeft("", 3, '*') == "***");
 }
 
-TEST_CASE("rpad works", "[rpad]") {
-  REQUIRE(strutil::rpad("abc", 5) == "abc  ");
-  REQUIRE(strutil::rpad("abc", 5, '0') == "abc00");
-  REQUIRE(strutil::rpad("abc", 2) == "abc");
-  REQUIRE(strutil::rpad("", 3, '*') == "***");
+TEST_CASE("padRight works", "[padRight]") {
+  REQUIRE(strutil::padRight("abc", 5) == "abc  ");
+  REQUIRE(strutil::padRight("abc", 5, '0') == "abc00");
+  REQUIRE(strutil::padRight("abc", 2) == "abc");
+  REQUIRE(strutil::padRight("", 3, '*') == "***");
 }
 
 TEST_CASE("trimLeft works", "[trimLeft]") {
@@ -201,7 +201,8 @@ TEST_CASE("join works", "[join]") {
 TEST_CASE("toUnixPath works", "[toUnixPath]") {
   REQUIRE(strutil::toUnixPath(".\\path\\to\\file.txt") == "./path/to/file.txt");
   REQUIRE(strutil::toUnixPath("./path/to//file.txt") == "./path/to/file.txt");
-  REQUIRE(strutil::toUnixPath(".\\\\path\\to\\file.txt") == "./path/to/file.txt");
+  REQUIRE(strutil::toUnixPath(".\\\\path\\to\\file.txt") ==
+          "./path/to/file.txt");
 }
 
 TEST_CASE("isNumber works", "[isNumber]") {
