@@ -1,7 +1,8 @@
-cmake_minimum_required(VERSION 3.50)
-project(StringUtilsTest)
+cmake_minimum_required(VERSION 3.20)
+project(StringUtilsTest LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -11,8 +12,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(Catch2)
 
-include_directories(include)
-
 add_executable(tests test/test.cpp)
+target_include_directories(tests PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)
 

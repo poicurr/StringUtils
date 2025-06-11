@@ -30,7 +30,26 @@ TEST_CASE("split works", "[split]") {
     auto res = strutil::split("", ",");
     REQUIRE(res.size() == 1);
     REQUIRE(res[0] == "");
+
+    auto res2 = strutil::split(",,", ",");
+    REQUIRE(res2.size() == 3);
+    REQUIRE(res2[0] == "");
+    REQUIRE(res2[1] == "");
+    REQUIRE(res2[2] == "");
   }
+}
+
+TEST_CASE("splitLines edge cases", "[splitLines]") {
+  auto res = strutil::splitLines("a\n\nb");
+  REQUIRE(res.size() == 3);
+  REQUIRE(res[0] == "a");
+  REQUIRE(res[1] == "");
+  REQUIRE(res[2] == "b");
+
+  res = strutil::splitLines("\n");
+  REQUIRE(res.size() == 2);
+  REQUIRE(res[0] == "");
+  REQUIRE(res[1] == "");
 }
 
 TEST_CASE("beginsWith works", "[beginsWith]") {
@@ -47,12 +66,42 @@ TEST_CASE("endnsWith works", "[endsWith]") {
   REQUIRE(strutil::endsWith("abcdefg", "") == true);  // !
 }
 
+TEST_CASE("beginsWithIgnoreCase works", "[beginsWithIgnoreCase]") {
+  REQUIRE(strutil::beginsWithIgnoreCase("Abcdef", "abc") == true);
+  REQUIRE(strutil::beginsWithIgnoreCase("abcdef", "ABC") == true);
+  REQUIRE(strutil::beginsWithIgnoreCase("abcdef", "def") == false);
+  REQUIRE(strutil::beginsWithIgnoreCase("", "abc") == false);
+  REQUIRE(strutil::beginsWithIgnoreCase("abcdef", "") == true);
+}
+
+TEST_CASE("endsWithIgnoreCase works", "[endsWithIgnoreCase]") {
+  REQUIRE(strutil::endsWithIgnoreCase("abcdef", "DEF") == true);
+  REQUIRE(strutil::endsWithIgnoreCase("abcdef", "def") == true);
+  REQUIRE(strutil::endsWithIgnoreCase("abcdef", "abc") == false);
+  REQUIRE(strutil::endsWithIgnoreCase("", "def") == false);
+  REQUIRE(strutil::endsWithIgnoreCase("abcdef", "") == true);
+}
+
 TEST_CASE("toLower(std::string) works", "[toLower]") {
   REQUIRE(strutil::toLower("AbCdEfG") == "abcdefg");
 }
 
 TEST_CASE("toUpper(std::string) works", "[toUpper]") {
   REQUIRE(strutil::toUpper("abcDEfg") == "ABCDEFG");
+}
+
+TEST_CASE("lpad works", "[lpad]") {
+  REQUIRE(strutil::lpad("abc", 5) == "  abc");
+  REQUIRE(strutil::lpad("abc", 5, '0') == "00abc");
+  REQUIRE(strutil::lpad("abc", 2) == "abc");
+  REQUIRE(strutil::lpad("", 3, '*') == "***");
+}
+
+TEST_CASE("rpad works", "[rpad]") {
+  REQUIRE(strutil::rpad("abc", 5) == "abc  ");
+  REQUIRE(strutil::rpad("abc", 5, '0') == "abc00");
+  REQUIRE(strutil::rpad("abc", 2) == "abc");
+  REQUIRE(strutil::rpad("", 3, '*') == "***");
 }
 
 TEST_CASE("trimLeft works", "[trimLeft]") {
@@ -67,6 +116,16 @@ TEST_CASE("trimRight works", "[trimRight]") {
   REQUIRE(strutil::trimRight("  abcdefg \t") == "  abcdefg");
   REQUIRE(strutil::trimRight("abcdefg") == "abcdefg");
   REQUIRE(strutil::trimRight("") == "");
+}
+
+TEST_CASE("trim works", "[trim]") {
+  REQUIRE(strutil::trim("   abc   ") == "abc");
+  REQUIRE(strutil::trim("abc   ") == "abc");
+  REQUIRE(strutil::trim("   abc") == "abc");
+  REQUIRE(strutil::trim("abc") == "abc");
+  REQUIRE(strutil::trim("   ") == "");
+  REQUIRE(strutil::trim("") == "");
+  REQUIRE(strutil::trim(" \tabc\t ") == "abc");
 }
 
 TEST_CASE("encode works", "[url][encode]") {
@@ -88,9 +147,17 @@ TEST_CASE("encodeURL works", "[url][encodeURL]") {
 }
 
 TEST_CASE("decode works", "[url][decode]") {
-  REQUIRE(strutil::decode("20") == ' ');
-  REQUIRE(strutil::decode("0A") == '\n');
-  REQUIRE(strutil::decode("25") == '%');
+  SECTION("Normal Case") {
+    REQUIRE(strutil::decode("20") == ' ');
+    REQUIRE(strutil::decode("0A") == '\n');
+    REQUIRE(strutil::decode("25") == '%');
+  }
+
+  SECTION("Nominal Case") {
+    REQUIRE_THROWS_AS(strutil::decode(""), std::invalid_argument);
+    REQUIRE_THROWS_AS(strutil::decode("A"), std::invalid_argument);
+    REQUIRE_THROWS_AS(strutil::decode("123"), std::invalid_argument);
+  }
 }
 
 TEST_CASE("decodeURL works", "[url][decodeURL]") {
@@ -135,4 +202,24 @@ TEST_CASE("toUnixPath works", "[toUnixPath]") {
   REQUIRE(strutil::toUnixPath(".\\path\\to\\file.txt") == "./path/to/file.txt");
   REQUIRE(strutil::toUnixPath("./path/to//file.txt") == "./path/to/file.txt");
   REQUIRE(strutil::toUnixPath(".\\\\path\\to\\file.txt") == "./path/to/file.txt");
+}
+
+TEST_CASE("isNumber works", "[isNumber]") {
+  REQUIRE(strutil::isNumber("123456") == true);
+  REQUIRE(strutil::isNumber("00123") == true);
+  REQUIRE(strutil::isNumber("") == false);
+  REQUIRE(strutil::isNumber("12a34") == false);
+  REQUIRE(strutil::isNumber(" 123") == false);
+}
+
+TEST_CASE("splitLines works", "[splitLines]") {
+  auto res = strutil::splitLines("a\nb\nc");
+  REQUIRE(res.size() == 3);
+  REQUIRE(res[0] == "a");
+  REQUIRE(res[1] == "b");
+  REQUIRE(res[2] == "c");
+
+  res = strutil::splitLines("");
+  REQUIRE(res.size() == 1);
+  REQUIRE(res[0] == "");
 }
