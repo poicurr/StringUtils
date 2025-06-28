@@ -6,7 +6,7 @@
 ## 特徴
 
 - ヘッダオンリー（リンク不要）
-- `string_utils` 名前空間で安全に設計
+- `strutil` 名前空間で安全に設計
 - `FetchContent_Declare` や `add_subdirectory` で簡単に導入可能
 - Catch2 によるユニットテスト（任意で有効化）
 
@@ -33,7 +33,7 @@ target_link_libraries(MyApp PRIVATE StringUtils)
 
 int main() {
   std::string input = "  hello world  ";
-  std::string trimmed = string_utils::trim(input);
+  std::string trimmed = strutil::trim(input);
   // trimmed == "hello world"
 }
 ```
