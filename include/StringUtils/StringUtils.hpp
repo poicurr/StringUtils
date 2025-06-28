@@ -38,6 +38,28 @@ inline bool isNumber(std::string_view s) {
   return true;
 }
 
+constexpr bool isUnreservedURIChar(unsigned char c) noexcept {
+  return
+    isAlpha(c) ||
+    isDigit(c) ||
+    c == '-' || c == '_' || c == '.' || c == '~';
+}
+
+constexpr bool isReservedURIChar(unsigned char c) noexcept {
+  switch (c) {
+    case ':': case '/': case '?': case '#': case '[': case ']': case '@':
+    case '!': case '$': case '&': case '\'': case '(': case ')':
+    case '*': case '+': case ',': case ';': case '=':
+      return true;
+    default:
+      return false;
+  }
+}
+
+constexpr bool isURILiteralSafe(unsigned char c) noexcept {
+  return isUnreservedURIChar(c) || isReservedURIChar(c);
+}
+
 inline std::vector<std::string> split(std::string_view s, std::string_view d) {
   std::vector<std::string> ret;
   size_t p1 = 0, p2;
@@ -92,7 +114,7 @@ inline std::string toUpper(const std::string& s) {
   return ret;
 }
 
-inline std::string repeat(char c, size_t n) noexcept {
+inline std::string repeat(char c, size_t n) {
   return std::string(n, c);
 }
 
@@ -126,14 +148,34 @@ inline std::string encode(char c) noexcept {
   return {a[(0xf0 & c) >> 4], a[0x0f & c]};
 }
 
-inline std::string encodeURL(const std::string& s) {
+inline std::string encodeURI(const std::string& s) {
   auto ret = std::string{};
-  for (char c : s) {
-    if (isLetter(c)) {
+  for (unsigned char c : s) {
+    if (c <= 0x7F && isURILiteralSafe(c)) {
       ret += c;
       continue;
     }
-    ret += "%" + encode(c);
+    ret += "%" + encode(static_cast<char>(c));
+  }
+  return ret;
+}
+
+inline std::string encodeURIComponent(const std::string& s) {
+  auto ret = std::string{};
+  for (unsigned char c : s) {
+    if (c <= 0x7F && isUnreservedURIChar(c)) {
+      ret += c;
+      continue;
+    }
+    ret += "%" + encode(static_cast<char>(c));
+  }
+  return ret;
+}
+
+inline std::string encodePercentAll(const std::string& s) {
+  std::string ret;
+  for (unsigned char c : s) {
+      ret += "%" + encode(static_cast<char>(c));
   }
   return ret;
 }
@@ -143,14 +185,14 @@ inline char decode(const std::string& s) {
     throw std::invalid_argument("Invalid hex string for decode: " + s);
   auto toHexValue = [](char c) -> uint8_t {
     if ('0' <= c && c <= '9') return c - '0';       // '0' ~ '9' ->  0 ~  9
-    if ('a' <= c && c <= 'z') return c - 'a' + 10;  // 'a' ~ 'f' -> 10 ~ 15
-    if ('A' <= c && c <= 'Z') return c - 'A' + 10;  // 'A' ~ 'F' -> 10 ~ 15
-    return 0;
+    if ('a' <= c && c <= 'f') return c - 'a' + 10;  // 'a' ~ 'f' -> 10 ~ 15
+    if ('A' <= c && c <= 'F') return c - 'A' + 10;  // 'A' ~ 'F' -> 10 ~ 15
+    throw std::invalid_argument("Invalid hex digit");
   };
   return static_cast<char>((toHexValue(s[0]) << 4) | toHexValue(s[1]));
 }
 
-inline std::string decodeURL(const std::string& s) {
+inline std::string decodeURI(const std::string& s) {
   std::string ret;
   for (size_t i = 0; i < s.size(); ++i) {
     if (s[i] == '%' && i + 2 < s.size()) {
@@ -161,6 +203,14 @@ inline std::string decodeURL(const std::string& s) {
     }
   }
   return ret;
+}
+
+inline std::string decodeURIComponent(const std::string& s) {
+  return decodeURI(s);
+}
+
+inline std::string decodePercentAll(const std::string& s) {
+  return decodeURI(s);
 }
 
 inline std::string replace(std::string_view s, std::string_view pattern,

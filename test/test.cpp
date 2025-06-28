@@ -1,4 +1,4 @@
-#define CATCH_CONFIG_MAIN
+﻿#define CATCH_CONFIG_MAIN
 
 #include <StringUtils/StringUtils.hpp>
 #include <catch2/catch_test_macros.hpp>
@@ -131,51 +131,79 @@ TEST_CASE("trim works", "[trim]") {
 TEST_CASE("encode works", "[url][encode]") {
   REQUIRE(strutil::encode(' ') == "20");
   REQUIRE(strutil::encode('\n') == "0A");
+  REQUIRE(strutil::encode('\x7F') == "7F");
   REQUIRE(strutil::encode('%') == "25");
+  REQUIRE(strutil::encode('A') == "41");
+  REQUIRE(strutil::encode('\x00') == "00");
 }
 
-TEST_CASE("encodeURL works", "[url][encodeURL]") {
-  SECTION("Normal Case") {
-    REQUIRE(strutil::encodeURL("hello") == "hello");
-    REQUIRE(strutil::encodeURL("hello world") == "hello%20world");
-    REQUIRE(strutil::encodeURL("abc123_") == "abc123_");
-    REQUIRE(strutil::encodeURL("100%") == "100%25");
-    REQUIRE(strutil::encodeURL("a b\n") == "a%20b%0A");
-  }
+TEST_CASE("encodeURI does not encode reserved characters", "[url][encodeURI]") {
+  // unreserved: A-Z a-z 0-9 -_.~
+  // reserved: : / ? # [ ] @ ! $ & ' ( ) * + , ; =
+  const std::string input =
+      u8"http://example.com/あいうえお?q=テスト&lang=ja";
+  std::string encoded = strutil::encodeURI(input);
 
-  SECTION("Nominal Case") { REQUIRE(strutil::encodeURL("") == ""); }
+  // Reserved chars like ':' '/' '?' '=' '&' should remain
+  REQUIRE(encoded.find("http://") == 0);
+  REQUIRE(encoded.find("?q=") != std::string::npos);
+  REQUIRE(encoded.find("&lang=") != std::string::npos);
+
+  // Non-ASCII parts should be percent-encoded
+  REQUIRE(encoded.find("%E3%81%82") != std::string::npos);  // あ
+  REQUIRE(encoded.find("テスト") == std::string::npos);
+}
+
+TEST_CASE("encodeURIComponent / decodeURIComponent round trip", "[url][component]") {
+  const std::string input = u8"こんにちは world&=あいう";
+  const auto encoded = strutil::encodeURIComponent(input);
+  const auto decoded = strutil::decodeURIComponent(encoded);
+  REQUIRE(decoded == input);
+  REQUIRE(encoded == "%E3%81%93%E3%82%93%E3%81%AB%E3%81%A1%E3%81%AF%20world%26%3D%E3%81%82%E3%81%84%E3%81%86");
+}
+
+TEST_CASE("encodePercentAll / decodePercentAll round trip", "[url][percentAll]") {
+  const std::string raw = u8"abc 123 日本語 %\n";
+  const auto encoded = strutil::encodePercentAll(raw);
+  const auto decoded = strutil::decodePercentAll(encoded);
+  REQUIRE(decoded == raw);
+  REQUIRE(encoded == "%61%62%63%20%31%32%33%20%E6%97%A5%E6%9C%AC%E8%AA%9E%20%25%0A");
 }
 
 TEST_CASE("decode works", "[url][decode]") {
   SECTION("Normal Case") {
     REQUIRE(strutil::decode("20") == ' ');
     REQUIRE(strutil::decode("0A") == '\n');
+    REQUIRE(strutil::decode("7F") == '\x7F');
     REQUIRE(strutil::decode("25") == '%');
+    REQUIRE(strutil::decode("41") == 'A');
+    REQUIRE(strutil::decode("00") == '\0');
   }
 
   SECTION("Nominal Case") {
     REQUIRE_THROWS_AS(strutil::decode(""), std::invalid_argument);
     REQUIRE_THROWS_AS(strutil::decode("A"), std::invalid_argument);
     REQUIRE_THROWS_AS(strutil::decode("123"), std::invalid_argument);
+	REQUIRE_THROWS_AS(strutil::decode("G1"), std::invalid_argument);
   }
 }
 
-TEST_CASE("decodeURL works", "[url][decodeURL]") {
+TEST_CASE("decodeURIComponent works", "[url][decodeURL]") {
   SECTION("Normal Case") {
-    REQUIRE(strutil::decodeURL("hello") == "hello");
-    REQUIRE(strutil::decodeURL("hello%20world") == "hello world");
-    REQUIRE(strutil::decodeURL("abc123_") == "abc123_");
-    REQUIRE(strutil::decodeURL("100%25") == "100%");
-    REQUIRE(strutil::decodeURL("a%20b%0A") == "a b\n");
+    REQUIRE(strutil::decodeURIComponent("hello") == "hello");
+    REQUIRE(strutil::decodeURIComponent("hello%20world") == "hello world");
+    REQUIRE(strutil::decodeURIComponent("abc123_") == "abc123_");
+    REQUIRE(strutil::decodeURIComponent("100%25") == "100%");
+    REQUIRE(strutil::decodeURIComponent("a%20b%0A") == "a b\n");
   }
 
-  SECTION("Nominal Case") { REQUIRE(strutil::decodeURL("") == ""); }
+  SECTION("Nominal Case") { REQUIRE(strutil::decodeURIComponent("") == ""); }
 }
 
-TEST_CASE("encodeURL/decodeURL with Japanese UTF-8", "[url][utf8]") {
-  const std::string original = "こんにちは";
-  const std::string encoded = strutil::encodeURL(original);
-  const std::string decoded = strutil::decodeURL(encoded);
+TEST_CASE("encodePercentAll/decodePercentAll with Japanese UTF-8", "[url][utf8]") {
+  const std::string original = u8"こんにちは";
+  const std::string encoded = strutil::encodePercentAll(original);
+  const std::string decoded = strutil::decodePercentAll(encoded);
   REQUIRE(decoded == original);
 }
 
