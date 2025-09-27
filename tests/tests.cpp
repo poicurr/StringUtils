@@ -56,14 +56,14 @@ TEST_CASE("beginsWith works", "[beginsWith]") {
   REQUIRE(strutil::beginsWith("abcdefg", "abc") == true);
   REQUIRE(strutil::beginsWith("abcdefg", "bc") == false);
   REQUIRE(strutil::beginsWith("", "abc") == false);
-  REQUIRE(strutil::beginsWith("abcdefg", "") == true);  // !
+  REQUIRE(strutil::beginsWith("abcdefg", "") == true); // !
 }
 
 TEST_CASE("endnsWith works", "[endsWith]") {
   REQUIRE(strutil::endsWith("abcdefg", "efg") == true);
   REQUIRE(strutil::endsWith("abcdefg", "ef") == false);
   REQUIRE(strutil::endsWith("", "efg") == false);
-  REQUIRE(strutil::endsWith("abcdefg", "") == true);  // !
+  REQUIRE(strutil::endsWith("abcdefg", "") == true); // !
 }
 
 TEST_CASE("beginsWithIgnoreCase works", "[beginsWithIgnoreCase]") {
@@ -140,8 +140,7 @@ TEST_CASE("encode works", "[url][encode]") {
 TEST_CASE("encodeURI does not encode reserved characters", "[url][encodeURI]") {
   // unreserved: A-Z a-z 0-9 -_.~
   // reserved: : / ? # [ ] @ ! $ & ' ( ) * + , ; =
-  const std::string input =
-      u8"http://example.com/あいうえお?q=テスト&lang=ja";
+  const std::string input = u8"http://example.com/あいうえお?q=テスト&lang=ja";
   std::string encoded = strutil::encodeURI(input);
 
   // Reserved chars like ':' '/' '?' '=' '&' should remain
@@ -150,24 +149,28 @@ TEST_CASE("encodeURI does not encode reserved characters", "[url][encodeURI]") {
   REQUIRE(encoded.find("&lang=") != std::string::npos);
 
   // Non-ASCII parts should be percent-encoded
-  REQUIRE(encoded.find("%E3%81%82") != std::string::npos);  // あ
+  REQUIRE(encoded.find("%E3%81%82") != std::string::npos); // あ
   REQUIRE(encoded.find("テスト") == std::string::npos);
 }
 
-TEST_CASE("encodeURIComponent / decodeURIComponent round trip", "[url][component]") {
+TEST_CASE("encodeURIComponent / decodeURIComponent round trip",
+          "[url][component]") {
   const std::string input = u8"こんにちは world&=あいう";
   const auto encoded = strutil::encodeURIComponent(input);
   const auto decoded = strutil::decodeURIComponent(encoded);
   REQUIRE(decoded == input);
-  REQUIRE(encoded == "%E3%81%93%E3%82%93%E3%81%AB%E3%81%A1%E3%81%AF%20world%26%3D%E3%81%82%E3%81%84%E3%81%86");
+  REQUIRE(encoded == "%E3%81%93%E3%82%93%E3%81%AB%E3%81%A1%E3%81%AF%20world%26%"
+                     "3D%E3%81%82%E3%81%84%E3%81%86");
 }
 
-TEST_CASE("encodePercentAll / decodePercentAll round trip", "[url][percentAll]") {
+TEST_CASE("encodePercentAll / decodePercentAll round trip",
+          "[url][percentAll]") {
   const std::string raw = u8"abc 123 日本語 %\n";
   const auto encoded = strutil::encodePercentAll(raw);
   const auto decoded = strutil::decodePercentAll(encoded);
   REQUIRE(decoded == raw);
-  REQUIRE(encoded == "%61%62%63%20%31%32%33%20%E6%97%A5%E6%9C%AC%E8%AA%9E%20%25%0A");
+  REQUIRE(encoded ==
+          "%61%62%63%20%31%32%33%20%E6%97%A5%E6%9C%AC%E8%AA%9E%20%25%0A");
 }
 
 TEST_CASE("decode works", "[url][decode]") {
@@ -184,7 +187,7 @@ TEST_CASE("decode works", "[url][decode]") {
     REQUIRE_THROWS_AS(strutil::decode(""), std::invalid_argument);
     REQUIRE_THROWS_AS(strutil::decode("A"), std::invalid_argument);
     REQUIRE_THROWS_AS(strutil::decode("123"), std::invalid_argument);
-	REQUIRE_THROWS_AS(strutil::decode("G1"), std::invalid_argument);
+    REQUIRE_THROWS_AS(strutil::decode("G1"), std::invalid_argument);
   }
 }
 
@@ -200,7 +203,8 @@ TEST_CASE("decodeURIComponent works", "[url][decodeURL]") {
   SECTION("Nominal Case") { REQUIRE(strutil::decodeURIComponent("") == ""); }
 }
 
-TEST_CASE("encodePercentAll/decodePercentAll with Japanese UTF-8", "[url][utf8]") {
+TEST_CASE("encodePercentAll/decodePercentAll with Japanese UTF-8",
+          "[url][utf8]") {
   const std::string original = u8"こんにちは";
   const std::string encoded = strutil::encodePercentAll(original);
   const std::string decoded = strutil::decodePercentAll(encoded);
@@ -251,4 +255,29 @@ TEST_CASE("splitLines works", "[splitLines]") {
   res = strutil::splitLines("");
   REQUIRE(res.size() == 1);
   REQUIRE(res[0] == "");
+}
+TEST_CASE("strutil::to handles integral inputs", "[to][integral]") {
+  REQUIRE(strutil::to<int>("42") == 42);
+  REQUIRE(strutil::to<long long>("-9000") == -9000);
+  REQUIRE_THROWS_AS(strutil::to<int>("123abc"), std::runtime_error);
+  REQUIRE_THROWS_AS(strutil::to<unsigned int>("-1"), std::runtime_error);
+}
+
+TEST_CASE("strutil::to handles floating point inputs", "[to][floating]") {
+  auto value = strutil::to<double>("3.14159");
+  REQUIRE(value == Approx(3.14159));
+  REQUIRE(strutil::to<float>("1e-3") == Approx(0.001f));
+  REQUIRE_THROWS_AS(strutil::to<double>("1.2.3"), std::runtime_error);
+}
+
+TEST_CASE("strutil::to handles boolean inputs", "[to][bool]") {
+  REQUIRE(strutil::to<bool>("true"));
+  REQUIRE_FALSE(strutil::to<bool>("0"));
+  REQUIRE(strutil::to<bool>(""));
+  REQUIRE_THROWS_AS(strutil::to<bool>("maybe"), std::runtime_error);
+}
+
+TEST_CASE("strutil::to handles string inputs", "[to][string]") {
+  REQUIRE(strutil::to<std::string>(" abc ") == std::string(" abc "));
+  REQUIRE(strutil::to<std::string>("") == std::string());
 }

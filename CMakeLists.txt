@@ -53,7 +53,7 @@ if(STRINGUTILS_ENABLE_TESTS)
   )
   FetchContent_MakeAvailable(Catch2)
 
-  add_executable(stringutils_test test/test.cpp)
+  add_executable(stringutils_test tests/tests.cpp)
   target_include_directories(stringutils_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
   target_link_libraries(stringutils_test PRIVATE Catch2::Catch2WithMain)
 

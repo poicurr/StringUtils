@@ -1,59 +1,59 @@
 # StringUtils
 
-シンプルで再利用可能な C++ ヘッダオンリーの文字列ユーティリティ集です。  
-`#include <StringUtils/StringUtils.hpp>` で使えます。
+A simple and reusable collection of C++ header-only string utilities.  
+Available via `#include <StringUtils/StringUtils.hpp>`.
 
-## 特徴
+## Features
 
-- ヘッダオンリー（リンク不要）
-- `strutil` 名前空間で安全に設計
-- `FetchContent_Declare` や `add_subdirectory` で簡単に導入可能
-- Catch2 によるユニットテスト（任意で有効化）
+- Header-only (no linking required)
+- Easily integrated using `FetchContent_Declare` or `add_subdirectory`
+- Unit tests via Catch2 (optionally enabled)
 
-## 使い方（CMake）
+## Usage (CMake)
 
-### FetchContent での使用例
+### Example using FetchContent
 
 ```cmake
 include(FetchContent)
 FetchContent_Declare(
   StringUtils
   GIT_REPOSITORY https://github.com/poicurr/StringUtils.git
-  GIT_TAG main
-)
+  GIT_TAG main)
+
 FetchContent_MakeAvailable(StringUtils)
 
 target_link_libraries(MyApp PRIVATE StringUtils)
 ```
 
-### include 例
+### Include Example
 
 ```cpp
 #include <StringUtils/StringUtils.hpp>
 
 int main() {
-  std::string input = "  hello world  ";
+  std::string input = “  hello world  ”;
   std::string trimmed = strutil::trim(input);
-  // trimmed == "hello world"
+  // trimmed == “hello world”
 }
 ```
 
-## テストの有効化（任意）
+## Enabling Tests (Optional)
 
-デフォルトではテストはビルドされません。テストを有効にするには：
+By default, tests are not built. To enable tests:
 
 ```cmake
-set(STRINGUTILS_ENABLE_TESTS ON CACHE BOOL "" FORCE)
+set(STRINGUTILS_ENABLE_TESTS ON CACHE BOOL “” FORCE)
 FetchContent_MakeAvailable(StringUtils)
 ```
 
-その後、CTestや手動で実行可能です：
+Afterwards, you can run them via CTest or manually:
 
 ```sh
-ctest    # CTest 経由
-./stringutils_test  # 手動実行
+ctest    # Via CTest
+./stringutils_test  # Manual execution
 ```
 
-## ライセンス
+## License
 
 MIT License
+

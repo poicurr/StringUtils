@@ -32,27 +32,42 @@ constexpr bool isCtl(int c) noexcept {
 }
 
 inline bool isNumber(std::string_view s) {
-  if (s.empty()) return false;
+  if (s.empty())
+    return false;
   for (char c : s)
-    if (!isDigit(c)) return false;
+    if (!isDigit(c))
+      return false;
   return true;
 }
 
 constexpr bool isUnreservedURIChar(unsigned char c) noexcept {
-  return
-    isAlpha(c) ||
-    isDigit(c) ||
-    c == '-' || c == '_' || c == '.' || c == '~';
+  return isAlpha(c) || isDigit(c) || c == '-' || c == '_' || c == '.' ||
+         c == '~';
 }
 
 constexpr bool isReservedURIChar(unsigned char c) noexcept {
   switch (c) {
-    case ':': case '/': case '?': case '#': case '[': case ']': case '@':
-    case '!': case '$': case '&': case '\'': case '(': case ')':
-    case '*': case '+': case ',': case ';': case '=':
-      return true;
-    default:
-      return false;
+  case ':':
+  case '/':
+  case '?':
+  case '#':
+  case '[':
+  case ']':
+  case '@':
+  case '!':
+  case '$':
+  case '&':
+  case '\'':
+  case '(':
+  case ')':
+  case '*':
+  case '+':
+  case ',':
+  case ';':
+  case '=':
+    return true;
+  default:
+    return false;
   }
 }
 
@@ -76,79 +91,88 @@ inline std::vector<std::string> splitLines(std::string_view s) {
 }
 
 inline bool beginsWith(std::string_view str, std::string_view prefix) {
-  if (str.size() < prefix.size()) return false;
+  if (str.size() < prefix.size())
+    return false;
   return str.compare(0, prefix.size(), prefix) == 0;
 }
 
 inline bool endsWith(std::string_view str, std::string_view suffix) {
-  if (str.size() < suffix.size()) return false;
+  if (str.size() < suffix.size())
+    return false;
   return str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
 }
 
 inline bool beginsWithIgnoreCase(std::string_view s, std::string_view prefix) {
-  if (s.size() < prefix.size()) return false;
+  if (s.size() < prefix.size())
+    return false;
   for (size_t i = 0; i < prefix.size(); ++i)
-    if (toLower(s[i]) != toLower(prefix[i])) return false;
+    if (toLower(s[i]) != toLower(prefix[i]))
+      return false;
   return true;
 }
 
 inline bool endsWithIgnoreCase(std::string_view s, std::string_view suffix) {
-  if (s.size() < suffix.size()) return false;
+  if (s.size() < suffix.size())
+    return false;
   const size_t offset = s.size() - suffix.size();
   for (size_t i = 0; i < suffix.size(); ++i)
-    if (toLower(s[offset + i]) != toLower(suffix[i])) return false;
+    if (toLower(s[offset + i]) != toLower(suffix[i]))
+      return false;
   return true;
 }
 
-inline std::string toLower(const std::string& s) {
+inline std::string toLower(const std::string &s) {
   std::string ret(s.size(), '\0');
   std::transform(s.begin(), s.end(), ret.begin(),
                  [](char c) { return toLower(c); });
   return ret;
 }
 
-inline std::string toUpper(const std::string& s) {
+inline std::string toUpper(const std::string &s) {
   std::string ret(s.size(), '\0');
   std::transform(s.begin(), s.end(), ret.begin(),
                  [](char c) { return toUpper(c); });
   return ret;
 }
 
-inline std::string repeat(char c, size_t n) {
-  return std::string(n, c);
-}
+inline std::string repeat(char c, size_t n) { return std::string(n, c); }
 
-inline std::string padLeft(const std::string& s, size_t len, char pad = ' ') {
-  if (s.size() >= len) return s;
+inline std::string padLeft(const std::string &s, size_t len, char pad = ' ') {
+  if (s.size() >= len)
+    return s;
   return repeat(pad, len - s.size()) + s;
 }
 
-inline std::string padRight(const std::string& s, size_t len, char pad = ' ') {
-  if (s.size() >= len) return s;
+inline std::string padRight(const std::string &s, size_t len, char pad = ' ') {
+  if (s.size() >= len)
+    return s;
   return s + repeat(pad, len - s.size());
 }
 
-inline std::string trimLeft(const std::string& s) {
+inline std::string trimLeft(const std::string &s) {
   auto first = s.begin(), last = s.end();
-  while (first != last && isSpace(*first)) ++first;
+  while (first != last && isSpace(*first))
+    ++first;
   return {first, last};
 }
 
-inline std::string trimRight(const std::string& s) {
-  if (s.empty()) return {};
+inline std::string trimRight(const std::string &s) {
+  if (s.empty())
+    return {};
   auto first = s.begin(), last = s.end() - 1;
-  while (first != last && isSpace(*last)) --last;
+  while (first != last && isSpace(*last))
+    --last;
   return {first, last + 1};
 }
 
-inline std::string trim(const std::string& s) { return trimLeft(trimRight(s)); }
+inline std::string trim(const std::string &s) { return trimLeft(trimRight(s)); }
 
 inline std::string encode(char c) noexcept {
   static const char a[] = "0123456789ABCDEF";
   return {a[(0xf0 & c) >> 4], a[0x0f & c]};
 }
 
-inline std::string encodeURI(const std::string& s) {
+inline std::string encodeURI(const std::string &s) {
   auto ret = std::string{};
   for (unsigned char c : s) {
     if (c <= 0x7F && isURILiteralSafe(c)) {
@@ -160,7 +184,7 @@ inline std::string encodeURI(const std::string& s) {
   return ret;
 }
 
-inline std::string encodeURIComponent(const std::string& s) {
+inline std::string encodeURIComponent(const std::string &s) {
   auto ret = std::string{};
   for (unsigned char c : s) {
     if (c <= 0x7F && isUnreservedURIChar(c)) {
@@ -172,27 +196,30 @@ inline std::string encodeURIComponent(const std::string& s) {
   return ret;
 }
 
-inline std::string encodePercentAll(const std::string& s) {
+inline std::string encodePercentAll(const std::string &s) {
   std::string ret;
   for (unsigned char c : s) {
-      ret += "%" + encode(static_cast<char>(c));
+    ret += "%" + encode(static_cast<char>(c));
   }
   return ret;
 }
 
-inline char decode(const std::string& s) {
+inline char decode(const std::string &s) {
   if (s.size() != 2)
     throw std::invalid_argument("Invalid hex string for decode: " + s);
   auto toHexValue = [](char c) -> uint8_t {
-    if ('0' <= c && c <= '9') return c - '0';       // '0' ~ '9' ->  0 ~  9
-    if ('a' <= c && c <= 'f') return c - 'a' + 10;  // 'a' ~ 'f' -> 10 ~ 15
-    if ('A' <= c && c <= 'F') return c - 'A' + 10;  // 'A' ~ 'F' -> 10 ~ 15
+    if ('0' <= c && c <= '9')
+      return c - '0'; // '0' ~ '9' ->  0 ~  9
+    if ('a' <= c && c <= 'f')
+      return c - 'a' + 10; // 'a' ~ 'f' -> 10 ~ 15
+    if ('A' <= c && c <= 'F')
+      return c - 'A' + 10; // 'A' ~ 'F' -> 10 ~ 15
     throw std::invalid_argument("Invalid hex digit");
   };
   return static_cast<char>((toHexValue(s[0]) << 4) | toHexValue(s[1]));
 }
 
-inline std::string decodeURI(const std::string& s) {
+inline std::string decodeURI(const std::string &s) {
   std::string ret;
   for (size_t i = 0; i < s.size(); ++i) {
     if (s[i] == '%' && i + 2 < s.size()) {
@@ -205,18 +232,20 @@ inline std::string decodeURI(const std::string& s) {
   return ret;
 }
 
-inline std::string decodeURIComponent(const std::string& s) {
+inline std::string decodeURIComponent(const std::string &s) {
   return decodeURI(s);
 }
 
-inline std::string decodePercentAll(const std::string& s) {
+inline std::string decodePercentAll(const std::string &s) {
   return decodeURI(s);
 }
 
 inline std::string replace(std::string_view s, std::string_view pattern,
                            std::string_view replacement) {
-  if (s.empty()) return {};
-  if (pattern.empty()) return {s.begin(), s.end()};
+  if (s.empty())
+    return {};
+  if (pattern.empty())
+    return {s.begin(), s.end()};
 
   std::string ret;
   size_t p1 = 0, p2;
@@ -233,11 +262,13 @@ inline std::string replace(std::string_view s, std::string_view pattern,
   return ret;
 }
 
-inline std::string join(const std::vector<std::string>& v,
-                        const std::string& d) {
-  if (v.empty()) return "";
+inline std::string join(const std::vector<std::string> &v,
+                        const std::string &d) {
+  if (v.empty())
+    return "";
   auto ret = v[0];
-  for (size_t i = 1; i < v.size(); ++i) ret += d + v[i];
+  for (size_t i = 1; i < v.size(); ++i)
+    ret += d + v[i];
   return ret;
 }
 
@@ -245,8 +276,68 @@ inline bool contains(std::string_view str, std::string_view pattern) noexcept {
   return str.find(pattern) != std::string::npos;
 }
 
-inline std::string toUnixPath(const std::string& path) {
+inline std::string toUnixPath(const std::string &path) {
   return replace(replace(path, "\\", "/"), "//", "/");
 }
 
-}  // namespace strutil
+template <class T> struct ParseResult {
+  T value{};
+  std::errc ec{};
+  explicit operator bool() const noexcept { return ec == std::errc{}; }
+};
+
+template <class T, class Enable = void> struct ParseTraits;
+
+template <class T>
+struct ParseTraits<
+    T, typename std::enable_if<std::is_integral<T>::value &&
+                               !std::is_same<T, bool>::value>::type> {
+  static ParseResult<T> parse(std::string_view s) {
+    T ret{};
+    auto r = std::from_chars(s.begin(), s.end(), ret);
+    if (r.ec != std::errc{} || r.ptr != s.end())
+      return {{}, r.ec ? r.ec : std::errc::invalid_argument};
+    return {ret, {}};
+  }
+};
+
+template <class T>
+struct ParseTraits<
+    T, typename std::enable_if<std::is_floating_point<T>::value>::type> {
+  static ParseResult<T> parse(std::string_view s) {
+    std::string tmp(s);
+    char *end = nullptr;
+    errno = 0;
+    long double w = std::strtold(tmp.c_str(), &end);
+    if (end != tmp.c_str() + tmp.size() || errno)
+      return {{}, std::errc::invalid_argument};
+    return {static_cast<T>(w), {}};
+  }
+};
+
+template <> struct ParseTraits<std::string, void> {
+  static ParseResult<std::string> parse(std::string_view s) {
+    return {std::string(s), {}};
+  }
+};
+
+template <> struct ParseTraits<bool, void> {
+  static ParseResult<bool> parse(std::string_view s) {
+    if (s.empty())
+      return {true, {}};
+    if (s == "1" || s == "true" || s == "on" || s == "yes")
+      return {true, {}};
+    if (s == "0" || s == "false" || s == "off" || s == "no")
+      return {false, {}};
+    return {{}, std::errc::invalid_argument};
+  }
+};
+
+template <class T> inline T to(std::string_view s) {
+  auto r = ParseTraits<T>::parse(s);
+  if (!r)
+    throw std::runtime_error("parse error");
+  return r.value;
+}
+
+} // namespace strutil
