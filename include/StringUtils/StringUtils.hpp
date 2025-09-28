@@ -46,31 +46,18 @@ constexpr bool isUnreservedURIChar(unsigned char c) noexcept {
          c == '~';
 }
 
+// clang-format off
 constexpr bool isReservedURIChar(unsigned char c) noexcept {
   switch (c) {
-  case ':':
-  case '/':
-  case '?':
-  case '#':
-  case '[':
-  case ']':
-  case '@':
-  case '!':
-  case '$':
-  case '&':
-  case '\'':
-  case '(':
-  case ')':
-  case '*':
-  case '+':
-  case ',':
-  case ';':
-  case '=':
-    return true;
-  default:
-    return false;
+    case ':': case '/': case '?': case '#': case '[': case ']': case '@':
+    case '!': case '$': case '&': case '\'': case '(': case ')':
+    case '*': case '+': case ',': case ';': case '=':
+      return true;
+    default:
+      return false;
   }
 }
+// clang-format on
 
 constexpr bool isURILiteralSafe(unsigned char c) noexcept {
   return isUnreservedURIChar(c) || isReservedURIChar(c);
@@ -284,7 +271,8 @@ inline std::string toUnixPath(const std::string &path) {
 template <class T, class Enable = void>
 struct ParseTraits : detail::ParseTraitsDefault<T, Enable> {};
 
-template <class T> inline T to(std::string_view s) {
+template <class T>
+inline T to(std::string_view s) {
   auto result = ParseTraits<T>::parse(s);
   if (!result)
     throw std::runtime_error("parse error");
