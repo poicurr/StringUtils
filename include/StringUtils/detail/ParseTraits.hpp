@@ -11,13 +11,15 @@
 namespace strutil {
 namespace detail {
 
-template <class T> struct ParseResult {
+template <class T>
+struct ParseResult {
   T value{};
   std::errc ec{};
   explicit operator bool() const noexcept { return ec == std::errc{}; }
 };
 
-template <class T, class Enable = void> struct ParseTraitsDefault;
+template <class T, class Enable = void>
+struct ParseTraitsDefault;
 
 template <class T>
 struct ParseTraitsDefault<
@@ -29,7 +31,9 @@ struct ParseTraitsDefault<
     auto *last = s.data() + s.size();
     auto result = std::from_chars(first, last, ret);
     if (result.ec != std::errc{} || result.ptr != last)
-      return {{}, result.ec != std::errc{} ? result.ec : std::errc::invalid_argument};
+      return {{},
+              result.ec != std::errc{} ? result.ec
+                                       : std::errc::invalid_argument};
     return {ret, {}};
   }
 };
@@ -48,13 +52,15 @@ struct ParseTraitsDefault<
   }
 };
 
-template <> struct ParseTraitsDefault<std::string, void> {
+template <>
+struct ParseTraitsDefault<std::string, void> {
   static ParseResult<std::string> parse(std::string_view s) {
     return {std::string(s), {}};
   }
 };
 
-template <> struct ParseTraitsDefault<bool, void> {
+template <>
+struct ParseTraitsDefault<bool, void> {
   static ParseResult<bool> parse(std::string_view s) {
     if (s.empty())
       return {false, {}};
