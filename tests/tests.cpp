@@ -2,6 +2,7 @@
 
 #include <StringUtils/StringUtils.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_approx.hpp>
 
 TEST_CASE("toLower works", "[toLower]") {
   auto res = strutil::toLower('a');
@@ -265,15 +266,15 @@ TEST_CASE("strutil::to handles integral inputs", "[to][integral]") {
 
 TEST_CASE("strutil::to handles floating point inputs", "[to][floating]") {
   auto value = strutil::to<double>("3.14159");
-  REQUIRE(value == Approx(3.14159));
-  REQUIRE(strutil::to<float>("1e-3") == Approx(0.001f));
+  REQUIRE(value == Catch::Approx(3.14159));
+  REQUIRE(strutil::to<float>("1e-3") == Catch::Approx(0.001f));
   REQUIRE_THROWS_AS(strutil::to<double>("1.2.3"), std::runtime_error);
 }
 
 TEST_CASE("strutil::to handles boolean inputs", "[to][bool]") {
   REQUIRE(strutil::to<bool>("true"));
   REQUIRE_FALSE(strutil::to<bool>("0"));
-  REQUIRE(strutil::to<bool>(""));
+  REQUIRE_FALSE(strutil::to<bool>(""));
   REQUIRE_THROWS_AS(strutil::to<bool>("maybe"), std::runtime_error);
 }
 

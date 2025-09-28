@@ -1,5 +1,6 @@
 #pragma once
 
+#include "StringUtils/detail/ParseTraits.hpp"
 #include <algorithm>
 #include <cstdint>
 #include <stdexcept>
@@ -280,64 +281,14 @@ inline std::string toUnixPath(const std::string &path) {
   return replace(replace(path, "\\", "/"), "//", "/");
 }
 
-template <class T> struct ParseResult {
-  T value{};
-  std::errc ec{};
-  explicit operator bool() const noexcept { return ec == std::errc{}; }
-};
-
-template <class T, class Enable = void> struct ParseTraits;
-
-template <class T>
-struct ParseTraits<
-    T, typename std::enable_if<std::is_integral<T>::value &&
-                               !std::is_same<T, bool>::value>::type> {
-  static ParseResult<T> parse(std::string_view s) {
-    T ret{};
-    auto r = std::from_chars(s.begin(), s.end(), ret);
-    if (r.ec != std::errc{} || r.ptr != s.end())
-      return {{}, r.ec ? r.ec : std::errc::invalid_argument};
-    return {ret, {}};
-  }
-};
-
-template <class T>
-struct ParseTraits<
-    T, typename std::enable_if<std::is_floating_point<T>::value>::type> {
-  static ParseResult<T> parse(std::string_view s) {
-    std::string tmp(s);
-    char *end = nullptr;
-    errno = 0;
-    long double w = std::strtold(tmp.c_str(), &end);
-    if (end != tmp.c_str() + tmp.size() || errno)
-      return {{}, std::errc::invalid_argument};
-    return {static_cast<T>(w), {}};
-  }
-};
-
-template <> struct ParseTraits<std::string, void> {
-  static ParseResult<std::string> parse(std::string_view s) {
-    return {std::string(s), {}};
-  }
-};
-
-template <> struct ParseTraits<bool, void> {
-  static ParseResult<bool> parse(std::string_view s) {
-    if (s.empty())
-      return {true, {}};
-    if (s == "1" || s == "true" || s == "on" || s == "yes")
-      return {true, {}};
-    if (s == "0" || s == "false" || s == "off" || s == "no")
-      return {false, {}};
-    return {{}, std::errc::invalid_argument};
-  }
-};
+template <class T, class Enable = void>
+struct ParseTraits : detail::ParseTraitsDefault<T, Enable> {};
 
 template <class T> inline T to(std::string_view s) {
-  auto r = ParseTraits<T>::parse(s);
-  if (!r)
+  auto result = ParseTraits<T>::parse(s);
+  if (!result)
     throw std::runtime_error("parse error");
-  return r.value;
+  return result.value;
 }
 
 } // namespace strutil
