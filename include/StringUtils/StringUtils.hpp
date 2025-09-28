@@ -1,6 +1,6 @@
 #pragma once
 
-#include "StringUtils/detail/ParseTraits.hpp"
+#include "detail/ParseTraits.hpp"
 #include <algorithm>
 #include <cstdint>
 #include <stdexcept>
