@@ -1,8 +1,8 @@
 ﻿#define CATCH_CONFIG_MAIN
 
 #include <StringUtils/StringUtils.hpp>
-#include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 TEST_CASE("toLower works", "[toLower]") {
   auto res = strutil::toLower('a');
@@ -41,16 +41,28 @@ TEST_CASE("split works", "[split]") {
 }
 
 TEST_CASE("splitLines edge cases", "[splitLines]") {
-  auto res = strutil::splitLines("a\n\nb");
-  REQUIRE(res.size() == 3);
-  REQUIRE(res[0] == "a");
-  REQUIRE(res[1] == "");
-  REQUIRE(res[2] == "b");
+  {
+    auto res = strutil::splitLines("a\n\nb");
+    REQUIRE(res.size() == 3);
+    REQUIRE(res[0] == "a");
+    REQUIRE(res[1] == "");
+    REQUIRE(res[2] == "b");
+  }
 
-  res = strutil::splitLines("\n");
-  REQUIRE(res.size() == 2);
-  REQUIRE(res[0] == "");
-  REQUIRE(res[1] == "");
+  {
+    auto res = strutil::splitLines("a\r\n\r\nb");
+    REQUIRE(res.size() == 3);
+    REQUIRE(res[0] == "a");
+    REQUIRE(res[1] == "");
+    REQUIRE(res[2] == "b");
+  }
+
+  {
+    auto res = strutil::splitLines("\n");
+    REQUIRE(res.size() == 2);
+    REQUIRE(res[0] == "");
+    REQUIRE(res[1] == "");
+  }
 }
 
 TEST_CASE("beginsWith works", "[beginsWith]") {

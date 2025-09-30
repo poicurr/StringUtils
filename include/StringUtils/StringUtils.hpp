@@ -63,19 +63,48 @@ constexpr bool isURILiteralSafe(unsigned char c) noexcept {
   return isUnreservedURIChar(c) || isReservedURIChar(c);
 }
 
-inline std::vector<std::string> split(std::string_view s, std::string_view d) {
-  std::vector<std::string> ret;
-  size_t p1 = 0, p2;
-  while ((p2 = s.find(d, p1)) != std::string_view::npos) {
-    ret.emplace_back(s.begin() + p1, s.begin() + p2);
-    p1 = p2 + d.size();
+inline std::string replace(std::string_view s, std::string_view pattern,
+                           std::string_view replacement) {
+  if (s.empty())
+    return {};
+  if (pattern.empty())
+    return std::string{s};
+  if (pattern == replacement)
+    return std::string{s};
+
+  std::string ret;
+  ret.reserve(s.size());
+
+  size_t start = 0;
+  while (true) {
+    size_t pos = s.find(pattern, start);
+    if (pos == std::string_view::npos) {
+      ret.append(s.substr(start));
+      break;
+    }
+    ret.append(s.substr(start, pos - start));
+    ret.append(replacement);
+    start = pos + pattern.size();
   }
-  ret.emplace_back(s.begin() + p1, s.end());
+  return ret;
+}
+
+inline std::vector<std::string> split(std::string_view s,
+                                      std::string_view delim) {
+  std::vector<std::string> ret;
+  size_t start = 0;
+  size_t pos;
+  while ((pos = s.find(delim, start)) != std::string_view::npos) {
+    ret.emplace_back(s.begin() + start, s.begin() + pos);
+    start = pos + delim.size();
+  }
+  ret.emplace_back(s.begin() + start, s.end());
   return ret;
 }
 
 inline std::vector<std::string> splitLines(std::string_view s) {
-  return split(s, "\n");
+  std::string unified = replace(s, "\r\n", "\n");
+  return split(unified, "\n");
 }
 
 inline bool beginsWith(std::string_view str, std::string_view prefix) {
@@ -228,28 +257,6 @@ inline std::string decodePercentAll(const std::string &s) {
   return decodeURI(s);
 }
 
-inline std::string replace(std::string_view s, std::string_view pattern,
-                           std::string_view replacement) {
-  if (s.empty())
-    return {};
-  if (pattern.empty())
-    return {s.begin(), s.end()};
-
-  std::string ret;
-  size_t p1 = 0, p2;
-  while (true) {
-    p2 = s.find(pattern, p1);
-    if (p2 == std::string_view::npos) {
-      ret += s.substr(p1);
-      break;
-    }
-    ret += s.substr(p1, p2 - p1);
-    ret += replacement;
-    p1 = p2 + pattern.size();
-  }
-  return ret;
-}
-
 inline std::string join(const std::vector<std::string> &v,
                         const std::string &d) {
   if (v.empty())
@@ -260,8 +267,8 @@ inline std::string join(const std::vector<std::string> &v,
   return ret;
 }
 
-inline bool contains(std::string_view str, std::string_view pattern) noexcept {
-  return str.find(pattern) != std::string::npos;
+inline bool contains(std::string_view s, std::string_view pattern) noexcept {
+  return s.find(pattern) != std::string::npos;
 }
 
 inline std::string toUnixPath(const std::string &path) {
