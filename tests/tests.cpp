@@ -40,28 +40,30 @@ TEST_CASE("split works", "[split]") {
   }
 }
 
-TEST_CASE("splitLines edge cases", "[splitLines]") {
-  {
+TEST_CASE("splitLines works", "[splitLines]") {
+  SECTION("Normal Case") {
     auto res = strutil::splitLines("a\n\nb");
     REQUIRE(res.size() == 3);
     REQUIRE(res[0] == "a");
     REQUIRE(res[1] == "");
     REQUIRE(res[2] == "b");
-  }
 
-  {
-    auto res = strutil::splitLines("a\r\n\r\nb");
+    res = strutil::splitLines("a\r\nb\r\nc");
     REQUIRE(res.size() == 3);
     REQUIRE(res[0] == "a");
-    REQUIRE(res[1] == "");
-    REQUIRE(res[2] == "b");
+    REQUIRE(res[1] == "b");
+    REQUIRE(res[2] == "c");
   }
 
-  {
+  SECTION("Nominal Case") {
     auto res = strutil::splitLines("\n");
     REQUIRE(res.size() == 2);
     REQUIRE(res[0] == "");
     REQUIRE(res[1] == "");
+
+    res = strutil::splitLines("");
+    REQUIRE(res.size() == 1);
+    REQUIRE(res[0] == "");
   }
 }
 
@@ -79,20 +81,20 @@ TEST_CASE("endnsWith works", "[endsWith]") {
   REQUIRE(strutil::endsWith("abcdefg", "") == true); // !
 }
 
-TEST_CASE("beginsWithIgnoreCase works", "[beginsWithIgnoreCase]") {
-  REQUIRE(strutil::beginsWithIgnoreCase("Abcdef", "abc") == true);
-  REQUIRE(strutil::beginsWithIgnoreCase("abcdef", "ABC") == true);
-  REQUIRE(strutil::beginsWithIgnoreCase("abcdef", "def") == false);
-  REQUIRE(strutil::beginsWithIgnoreCase("", "abc") == false);
-  REQUIRE(strutil::beginsWithIgnoreCase("abcdef", "") == true);
+TEST_CASE("beginsWith(ignoreCase) works", "[beginsWith][ignoreCase]") {
+  REQUIRE(strutil::beginsWith("Abcdef", "abc", true));
+  REQUIRE(strutil::beginsWith("abcdef", "ABC", true));
+  REQUIRE_FALSE(strutil::beginsWith("abcdef", "def", true));
+  REQUIRE_FALSE(strutil::beginsWith("", "abc", true));
+  REQUIRE(strutil::beginsWith("abcdef", "", true));
 }
 
-TEST_CASE("endsWithIgnoreCase works", "[endsWithIgnoreCase]") {
-  REQUIRE(strutil::endsWithIgnoreCase("abcdef", "DEF") == true);
-  REQUIRE(strutil::endsWithIgnoreCase("abcdef", "def") == true);
-  REQUIRE(strutil::endsWithIgnoreCase("abcdef", "abc") == false);
-  REQUIRE(strutil::endsWithIgnoreCase("", "def") == false);
-  REQUIRE(strutil::endsWithIgnoreCase("abcdef", "") == true);
+TEST_CASE("endsWith(ignoreCase) works", "[endsWith][ignoreCase]") {
+  REQUIRE(strutil::endsWith("abcdef", "DEF", true));
+  REQUIRE(strutil::endsWith("abcdef", "def", true));
+  REQUIRE_FALSE(strutil::endsWith("abcdef", "abc", true));
+  REQUIRE_FALSE(strutil::endsWith("", "def", true));
+  REQUIRE(strutil::endsWith("abcdef", "", true));
 }
 
 TEST_CASE("toLower(std::string) works", "[toLower]") {
@@ -258,17 +260,6 @@ TEST_CASE("isNumber works", "[isNumber]") {
   REQUIRE(strutil::isNumber(" 123") == false);
 }
 
-TEST_CASE("splitLines works", "[splitLines]") {
-  auto res = strutil::splitLines("a\nb\nc");
-  REQUIRE(res.size() == 3);
-  REQUIRE(res[0] == "a");
-  REQUIRE(res[1] == "b");
-  REQUIRE(res[2] == "c");
-
-  res = strutil::splitLines("");
-  REQUIRE(res.size() == 1);
-  REQUIRE(res[0] == "");
-}
 TEST_CASE("strutil::to handles integral inputs", "[to][integral]") {
   REQUIRE(strutil::to<int>("42") == 42);
   REQUIRE(strutil::to<long long>("-9000") == -9000);

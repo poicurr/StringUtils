@@ -107,34 +107,32 @@ inline std::vector<std::string> splitLines(std::string_view s) {
   return split(unified, "\n");
 }
 
-inline bool beginsWith(std::string_view str, std::string_view prefix) {
-  if (str.size() < prefix.size())
-    return false;
-  return str.compare(0, prefix.size(), prefix) == 0;
-}
-
-inline bool endsWith(std::string_view str, std::string_view suffix) {
-  if (str.size() < suffix.size())
-    return false;
-  return str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
-}
-
-inline bool beginsWithIgnoreCase(std::string_view s, std::string_view prefix) {
+inline bool beginsWith(std::string_view s, std::string_view prefix,
+                       bool ignoreCase = false) {
   if (s.size() < prefix.size())
     return false;
-  for (size_t i = 0; i < prefix.size(); ++i)
+  if (!ignoreCase)
+    return s.compare(0, prefix.size(), prefix) == 0;
+
+  for (size_t i = 0; i < prefix.size(); ++i) {
     if (toLower(s[i]) != toLower(prefix[i]))
       return false;
+  }
   return true;
 }
 
-inline bool endsWithIgnoreCase(std::string_view s, std::string_view suffix) {
+inline bool endsWith(std::string_view s, std::string_view suffix,
+                     bool ignoreCase = false) {
   if (s.size() < suffix.size())
     return false;
-  const size_t offset = s.size() - suffix.size();
-  for (size_t i = 0; i < suffix.size(); ++i)
+  if (!ignoreCase)
+    return s.compare(s.size() - suffix.size(), suffix.size(), suffix) == 0;
+
+  size_t offset = s.size() - suffix.size();
+  for (size_t i = 0; i < suffix.size(); ++i) {
     if (toLower(s[offset + i]) != toLower(suffix[i]))
       return false;
+  }
   return true;
 }
 
