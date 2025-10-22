@@ -1,11 +1,11 @@
 # StringUtils
 
-A simple and reusable collection of C++ header-only string utilities.  
-Available via `#include <StringUtils/StringUtils.hpp>`.
+A simple and reusable collection of string utilities using C++ module.
+Available via `import strutil;`.
 
 ## Features
 
-- Header-only (no linking required)
+- Using C++ module
 - Easily integrated using `FetchContent_Declare` or `add_subdirectory`
 - Unit tests via Catch2 (optionally enabled)
 
@@ -28,7 +28,7 @@ target_link_libraries(MyApp PRIVATE StringUtils)
 ### Include Example
 
 ```cpp
-#include <StringUtils/StringUtils.hpp>
+import strutil;
 
 int main() {
   std::string input = “  hello world  ”;
