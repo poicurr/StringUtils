@@ -1,6 +1,5 @@
-#pragma once
+module;
 
-#include "detail/ParseTraits.hpp"
 #include <algorithm>
 #include <cstdint>
 #include <stdexcept>
@@ -8,7 +7,11 @@
 #include <string_view>
 #include <vector>
 
-namespace strutil {
+export module strutil;
+
+import ParseTraitsDefault;
+
+export namespace strutil {
 
 constexpr char toLower(char c) noexcept {
   return 'A' <= c && c <= 'Z' ? c + 'a' - 'A' : c;
@@ -284,4 +287,4 @@ inline T to(std::string_view s) {
   return result.value;
 }
 
-} // namespace strutil
+}

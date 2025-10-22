@@ -1,8 +1,18 @@
 ﻿#define CATCH_CONFIG_MAIN
 
-#include <StringUtils/StringUtils.hpp>
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <string>
+
+import strutil;
+
+namespace {
+
+std::string makeUtf8String(const char8_t *literal) {
+  return std::string(reinterpret_cast<const char *>(literal));
+}
+
+} // namespace
 
 TEST_CASE("toLower works", "[toLower]") {
   auto res = strutil::toLower('a');
@@ -155,7 +165,7 @@ TEST_CASE("encode works", "[url][encode]") {
 TEST_CASE("encodeURI does not encode reserved characters", "[url][encodeURI]") {
   // unreserved: A-Z a-z 0-9 -_.~
   // reserved: : / ? # [ ] @ ! $ & ' ( ) * + , ; =
-  const std::string input = u8"http://example.com/あいうえお?q=テスト&lang=ja";
+  const std::string input = makeUtf8String(u8"http://example.com/あいうえお?q=テスト&lang=ja");
   std::string encoded = strutil::encodeURI(input);
 
   // Reserved chars like ':' '/' '?' '=' '&' should remain
@@ -170,7 +180,7 @@ TEST_CASE("encodeURI does not encode reserved characters", "[url][encodeURI]") {
 
 TEST_CASE("encodeURIComponent / decodeURIComponent round trip",
           "[url][component]") {
-  const std::string input = u8"こんにちは world&=あいう";
+  const std::string input = makeUtf8String(u8"こんにちは world&=あいう");
   const auto encoded = strutil::encodeURIComponent(input);
   const auto decoded = strutil::decodeURIComponent(encoded);
   REQUIRE(decoded == input);
@@ -180,7 +190,7 @@ TEST_CASE("encodeURIComponent / decodeURIComponent round trip",
 
 TEST_CASE("encodePercentAll / decodePercentAll round trip",
           "[url][percentAll]") {
-  const std::string raw = u8"abc 123 日本語 %\n";
+  const std::string raw = makeUtf8String(u8"abc 123 日本語 %\n");
   const auto encoded = strutil::encodePercentAll(raw);
   const auto decoded = strutil::decodePercentAll(encoded);
   REQUIRE(decoded == raw);
@@ -220,7 +230,7 @@ TEST_CASE("decodeURIComponent works", "[url][decodeURL]") {
 
 TEST_CASE("encodePercentAll/decodePercentAll with Japanese UTF-8",
           "[url][utf8]") {
-  const std::string original = u8"こんにちは";
+  const std::string original = makeUtf8String(u8"こんにちは");
   const std::string encoded = strutil::encodePercentAll(original);
   const std::string decoded = strutil::decodePercentAll(encoded);
   REQUIRE(decoded == original);

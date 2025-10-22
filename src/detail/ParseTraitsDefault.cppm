@@ -1,4 +1,4 @@
-﻿#pragma once
+module;
 
 #include <cerrno>
 #include <charconv>
@@ -8,8 +8,9 @@
 #include <system_error>
 #include <type_traits>
 
-namespace strutil {
-namespace detail {
+export module ParseTraitsDefault;
+
+export namespace detail {
 
 template <class T>
 struct ParseResult {
@@ -73,4 +74,3 @@ struct ParseTraitsDefault<bool, void> {
 };
 
 } // namespace detail
-} // namespace strutil
