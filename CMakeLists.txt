@@ -11,6 +11,15 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   if (APPLE)
     add_compile_options(-stdlib=libc++)
     add_link_options(-stdlib=libc++)
+  elseif (WIN32)
+    if (CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC" OR
+        CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+      # clang-cl + MSVC STL
+    else()
+      # MSYS2/llvm-mingw
+      add_compile_options(-stdlib=libc++)
+      add_link_options(-stdlib=libc++ -lc++abi -fuse-ld=lld)
+    endif()
   else()
     add_compile_options(-stdlib=libc++)
     add_link_options(-stdlib=libc++ -lc++abi)

@@ -1,10 +1,10 @@
 ﻿#define CATCH_CONFIG_MAIN
 
+import strutil;
+
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <string>
-
-import strutil;
 
 namespace {
 
@@ -165,7 +165,8 @@ TEST_CASE("encode works", "[url][encode]") {
 TEST_CASE("encodeURI does not encode reserved characters", "[url][encodeURI]") {
   // unreserved: A-Z a-z 0-9 -_.~
   // reserved: : / ? # [ ] @ ! $ & ' ( ) * + , ; =
-  const std::string input = makeUtf8String(u8"http://example.com/あいうえお?q=テスト&lang=ja");
+  const std::string input =
+      makeUtf8String(u8"http://example.com/あいうえお?q=テスト&lang=ja");
   std::string encoded = strutil::encodeURI(input);
 
   // Reserved chars like ':' '/' '?' '=' '&' should remain
