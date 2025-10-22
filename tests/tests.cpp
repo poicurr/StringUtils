@@ -165,7 +165,8 @@ TEST_CASE("encode works", "[url][encode]") {
 TEST_CASE("encodeURI does not encode reserved characters", "[url][encodeURI]") {
   // unreserved: A-Z a-z 0-9 -_.~
   // reserved: : / ? # [ ] @ ! $ & ' ( ) * + , ; =
-  const std::string input = makeUtf8String(u8"http://example.com/あいうえお?q=テスト&lang=ja");
+  const std::string input =
+      makeUtf8String(u8"http://example.com/あいうえお?q=テスト&lang=ja");
   std::string encoded = strutil::encodeURI(input);
 
   // Reserved chars like ':' '/' '?' '=' '&' should remain
